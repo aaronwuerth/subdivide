@@ -1,0 +1,10 @@
+[package]
+name = "subdivide"
+version = "0.1.0"
+edition = "2024"
+license = "BlueOak-1.0.0"
+
+[dependencies]
+clap = { version = "4.5.57", features = ["derive"] }
+nalgebra = "0.34.1"
+ply-rs-bw = "3.0.0"
