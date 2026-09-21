@@ -91,8 +91,20 @@ impl Mesh {
             self.edges.get_mut(&transfered_edge).unwrap()[idx] = n;
 
             let face = self.faces[face_idx].vertex_indices;
-            self.faces[face_idx] = Face::new((face[a], face[c], new_vertex_idx));
-            self.faces[n] = Face::new((face[b], face[c], new_vertex_idx));
+
+            let split_face = |a: usize, b: usize| {
+                let (a, b) = (a.min(b), a.max(b));
+                let vertices = (face[a], face[b], new_vertex_idx);
+
+                if b - a == 1 {
+                    Face::new(vertices)
+                } else {
+                    Face::new((vertices.0, vertices.2, vertices.1))
+                }
+            };
+
+            self.faces[face_idx] = split_face(a, c);
+            self.faces[n] = split_face(b, c);
 
             // the old triangle always keeps the first vertex of a split edge
             edge_to_faces[0].push(face_idx);
@@ -187,19 +199,7 @@ pub struct Face {
 
 impl Face {
     fn new(vertex_indices: (usize, usize, usize)) -> Face {
-        let (mut a, mut b, mut c) = vertex_indices;
-
-        if a > b {
-            (a, b) = (b, a);
-        }
-        if a > c {
-            (a, c) = (c, a);
-        }
-        if b > c {
-            (b, c) = (c, b);
-        }
-
-        assert!(a < b && b < c);
+        let (a, b, c) = vertex_indices;
 
         Face {
             vertex_indices: [a, b, c],
